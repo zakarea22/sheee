@@ -27,9 +27,16 @@ jobs:
         with:
           gradle-version: "8.9"
 
+          
       - name: Build debug APK
-        run: gradle assembleDebug --stacktrace
-
+        run: |
+          gradle assembleDebug --console=plain > build.log 2>&1 || {
+            echo "=========== ERRORS ==========="
+            grep -E "^e: |^w: .*error|What went wrong" -A6 build.log | head -60
+            echo "=========== LAST 40 LINES ==========="
+            tail -40 build.log
+            exit 1
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: AIM-debug-apk
